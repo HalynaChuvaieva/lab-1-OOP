@@ -1,172 +1,121 @@
 #include <iostream>
-#include <vector>
+#include "Graph.h"
+#include "BinarySearchTree.h"
 using namespace std;
-class BinarySearchTree {
-private:
-    struct Node {
-        int key;
-        Node* left;
-        Node* right;
-        Node(int val) : key(val), left(nullptr), right(nullptr) {}
-    };
 
-    Node* root;
+void menu() {
+    int mainChoice;
+    do {
+        cout << "\nMAIN MENU\n";
+        cout << "1. Binary Search Tree\n";
+        cout << "2. Balanced BST\n";
+        cout << "3. AVL Tree\n";
+        cout << "4. Graph\n";
+        cout << "0. Exit\n";
+        cout << "Your choice: ";
+        cin >> mainChoice;
 
-    Node* insert(Node* node, int key) {
-        if (!node) return new Node(key);
+        switch (mainChoice) {
+        case 1: {
+            BinarySearchTree<int> bst;
+            int choice;
+            do {
+                cout << "\nBINARY SEARCH TREE MENU\n";
+                cout << "1. Insert\n";
+                cout << "2. Remove\n";
+                cout << "3. Display\n";
+                cout << "0. Back\n";
+                cout << "Choice: ";
+                cin >> choice;
+                if (choice == 1) { int val; cout << "Value: "; cin >> val; bst.insert(val); }
+                else if (choice == 2) { int val; cout << "Value: "; cin >> val; bst.remove(val); }
+                else if (choice == 3) bst.display();
+            } while (choice != 0);
+            break;
+        }
+        case 2: {
+            BalancedBST<int> bst;
+            int choice;
+            do {
+                cout << "\nBALANCED BST MENU\n";
+                cout << "1. Insert\n";
+                cout << "2. Remove\n";
+                cout << "3. Display\n";
+                cout << "4. Get height\n";
+                cout << "0. Back\n";
+                cout << "Choice: ";
+                cin >> choice;
+                if (choice == 1) { int val; cout << "Value: "; cin >> val; bst.insert(val); }
+                else if (choice == 2) { int val; cout << "Value: "; cin >> val; bst.remove(val); }
+                else if (choice == 3) bst.display();
+                else if (choice == 4) cout << "Height: " << bst.getHeight() << endl;
+            } while (choice != 0);
+            break;
+        }
+        case 3: {
+            AVLTree<int> avl;
+            int choice;
+            do {
+                cout << "\nAVL TREE MENU\n";
+                cout << "1. Insert\n";
+                cout << "2. Display\n";
+                cout << "0. Back\n";
+                cout << "Choice: ";
+                cin >> choice;
+                if (choice == 1) { int val; cout << "Value: "; cin >> val; avl.insert(val); }
+                else if (choice == 2) avl.display();
+            } while (choice != 0);
+            break;
+        }
+        case 4: {
+            int graphType;
+            cout << "\nGRAPH MENU\n";
+            cout << "1. Undirected Graph\n";
+            cout << "2. Directed Graph\n";
+            cout << "3. Weighted Graph\n";
+            cout << "4. Negative Weighted Graph\n";
+            cout << "Choice: ";
+            cin >> graphType;
 
-        if (key < node->key)
-            node->left = insert(node->left, key);
-        else if (key > node->key)
-            node->right = insert(node->right, key);
+            int n, m;
+            cout << "Enter number of vertices: "; cin >> n;
+            cout << "Enter number of edges: "; cin >> m;
 
-        return node;
-    }
-
-    Node* minValue(Node* node) {
-        Node* current = node;
-        while (current && current->left != nullptr)
-            current = current->left;
-        return current;
-    }
-
-    Node* deleteNode(Node* node, int key) {
-        if (!node) return node;
-
-        if (key < node->key)
-            node->left = deleteNode(node->left, key);
-        else if (key > node->key)
-            node->right = deleteNode(node->right, key);
-        else {
-            if (!node->left) {
-                Node* temp = node->right;
-                delete node;
-                return temp;
+            if (graphType == 1) {
+                UndirectedGraph g(n);
+                cout << "Enter edges (u v):\n";
+                for (int i = 0; i < m; i++) { int u,v; cin >> u >> v; g.addEdge(u,v); }
+                g.buildSpanningTree();
+                cout << "Cyclic? " << (g.isCyclic() ? "Yes\n" : "No\n");
             }
-            else if (!node->right) {
-                Node* temp = node->left;
-                delete node;
-                return temp;
+            else if (graphType == 2) {
+                DirectedGraph g(n);
+                cout << "Enter edges (u v):\n";
+                for (int i = 0; i < m; i++) { int u,v; cin >> u >> v; g.addEdge(u,v); }
+                g.buildSpanningTree();
+                cout << "Cyclic? " << (g.isCyclic() ? "Yes\n" : "No\n");
             }
-            Node* temp = minValue(node->right);
-            node->key = temp->key;
-            node->right = deleteNode(node->right, temp->key);
-        }
-        return node;
-    }
-
-    void inorder(Node* node) {
-        if (node) {
-            inorder(node->left);
-            cout << node->key << " ";
-            inorder(node->right);
-        }
-    }
-
-public:
-    BinarySearchTree() : root(nullptr) {}
-
-    void insert(int key) {
-        root = insert(root, key);
-    }
-    void remove(int key) {
-        root = deleteNode(root, key);
-    }
-    void display() {
-        cout << "Дерево: ";
-        inorder(root);
-        cout << endl;
-    }
-};
-
-class Graph {
-private:
-    int n;  
-    vector<vector<int>> adj; 
-    vector<bool> visited;
-    vector<pair<int, int>> spanningTree; 
-
-    void dfs(int v) {
-        visited[v] = true;
-        for (int u : adj[v]) {
-            if (!visited[u]) {
-                spanningTree.push_back({ v, u });
-                dfs(u);
+            else if (graphType == 3) {
+                WeightedGraph g(n);
+                cout << "Enter edges (u v w):\n";
+                for (int i = 0; i < m; i++) { int u,v,w; cin >> u >> v >> w; g.addEdge(u,v,w); }
+                g.dijkstra(0);
             }
+            else if (graphType == 4) {
+                NegativeWeightedGraph g(n);
+                cout << "Enter edges (u v w):\n";
+                for (int i = 0; i < m; i++) { int u,v,w; cin >> u >> v >> w; g.addEdge(u,v,w); }
+                g.bellmanFord(0);
+            }
+
+            break;
         }
-    }
-
-public:
-    Graph(int vertices) {
-        n = vertices;
-        adj.assign(n, {});
-        visited.assign(n, false);
-    }
-
-    void addEdge(int u, int v) {
-        adj[u].push_back(v);
-        adj[v].push_back(u);
-    }
-
-    void buildSpanningTree(int start = 0) {
-        spanningTree.clear();
-        fill(visited.begin(), visited.end(), false);
-
-        dfs(start);
-
-        cout << "Кістякове дерево складається з ребер:\n";
-        for (pair<int, int> e : spanningTree) {
-            cout << e.first << " - " << e.second << endl;
         }
-    }
-};
+    } while (mainChoice != 0);
+}
 
 int main() {
-    setlocale(LC_CTYPE, "ukr");
-    BinarySearchTree bst;
-    int choice;
-
-    while (choice!=0){
-        cout << "1. Додати елемент у бінарне дерево\n";
-        cout << "2. Видалити елемент з дерева\n";
-        cout << "3. Вивести дерево\n";
-        cout << "4. Побудувати кістякове дерево графа\n";
-        cout << "0. Вихід\n";
-        cout << "Ваш вибір: ";
-        cin >> choice;
-
-        if (choice == 1) {
-            int val;
-            cout << "Введіть значення: ";
-            cin >> val;
-            bst.insert(val);
-        }
-        else if (choice == 2) {
-            int val;
-            cout << "Введіть значення для видалення: ";
-            cin >> val;
-            bst.remove(val);
-        }
-        else if (choice == 3) {
-            bst.display();
-        }
-        else if (choice == 4) {
-            int n, m;
-            cout << "Введіть кількість вершин графа: ";
-            cin >> n;
-            cout << "Введіть кількість ребер: ";
-            cin >> m;
-
-            Graph g(n);
-            cout << "Введіть ребра (u v):\n";
-            for (int i = 0; i < m; i++) {
-                int u, v;
-                cin >> u >> v;
-                g.addEdge(u, v);
-            }
-            g.buildSpanningTree(0);
-        }
-    } 
+    menu();
     return 0;
 }
 
